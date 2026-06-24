@@ -6,7 +6,6 @@
     <title>暗黑极光管理中心</title>
     <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-database-compat.js"></script>
-    <script src="https://unpkg.com/vconsole@latest/dist/vconsole.min.js"></script>
     <style>
         :root { --bg-main: #12131a; --bg-card: rgba(31, 33, 46, 0.65); --bg-input: rgba(255, 255, 255, 0.04); --border-glass: rgba(255, 255, 255, 0.08); --text-white: #ffffff; --text-gray: #9ca3af; --primary-purple: #a855f7; --primary-gradient: linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%); --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.5); }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif; }
@@ -145,7 +144,6 @@
     <!-- 后台主页 -->
     <div id="dashboardWrapper">
         <div class="mobile-header">
-            <!-- 保留 onclick 和 id 双重绑定，确保兼容旧缓存 -->
             <button class="hamburger" id="menuBtn" onclick="toggleSidebar()">☰</button>
             <div class="title">导航管理中心</div>
             <button onclick="location.reload()" style="background:none; border:none; color:var(--text-gray); font-size:20px;">⟳</button>
@@ -198,8 +196,6 @@
     </div>
 
     <script>
-        var vConsole = new VConsole();
-
         // ===================== 1. 核心配置 =====================
         const firebaseConfig = {
             apiKey: "AIzaSyCI5yewq1Cu5I38LLjuky9KG1rnKh76W4Q",
@@ -295,31 +291,22 @@
             switchMode('modeLogin'); setMsg('请输入账号和密码登录');
         }
 
-        // ===================== 【终极修复】强行挂载菜单切换函数 =====================
-        // 将其绑定到 window 对象，确保 HTML 中的 onclick="toggleSidebar()" 能够找到
+        // ===================== 【修复】强行挂载菜单切换函数 =====================
         window.toggleSidebar = function() {
-            console.log("✅ 菜单点击事件已触发！");
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('overlay');
             if (sidebar) {
                 sidebar.classList.toggle('open');
-                console.log("侧边栏状态已切换");
-            } else {
-                console.error("找不到 sidebar 元素！");
             }
             if (overlay) {
                 overlay.classList.toggle('active');
-            } else {
-                console.error("找不到 overlay 元素！");
             }
         };
 
-        // 同时也用 addEventListener 监听一次，双重保障
         document.addEventListener('DOMContentLoaded', function() {
             const menuBtn = document.getElementById('menuBtn');
             if (menuBtn) {
                 menuBtn.addEventListener('click', window.toggleSidebar);
-                console.log("✅ addEventListener 绑定成功");
             }
         });
 
@@ -461,4 +448,4 @@
         initAuth();
     </script>
 </body>
-                                                                   </html>
+</html>
