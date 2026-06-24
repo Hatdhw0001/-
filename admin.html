@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>暗黑极光中心</title>
+    <title>暗黑极光管理中心</title>
+    <!-- 只保留 Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-database-compat.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --bg-main: #12131a; --bg-card: rgba(31, 33, 46, 0.65); --bg-input: rgba(255, 255, 255, 0.04); --border-glass: rgba(255, 255, 255, 0.08); --text-white: #ffffff; --text-gray: #9ca3af; --primary-purple: #a855f7; --primary-gradient: linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%); --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.5); }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif; }
@@ -91,9 +91,6 @@
         .legend-item .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
         .legend-item .dot.yellow { background: #eab308; }.legend-item .dot.purple { background: #8b5cf6; }.legend-item .dot.green { background: #22c55e; }
         .legend-item .val { margin-left: auto; color: #fff; font-weight: 600; }
-        .file-upload-group { display: flex; gap: 10px; align-items: center; background: rgba(255,255,255,0.03); padding: 8px 12px; border-radius: 10px; border: 1px dashed var(--border-glass); margin-top: 4px; }
-        .file-upload-btn { background: transparent; border: none; color: var(--text-gray); cursor: pointer; font-size: 13px; flex:1;}
-        .file-upload-status { font-size: 12px; color: var(--text-gray); }
         .edit-modal { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(18, 19, 26, 0.8); backdrop-filter: blur(4px); padding: 20px; align-items: center; justify-content: center; }
         .edit-modal.open { display: flex; }
         .edit-modal .modal-box { width: 100%; max-width: 460px; background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: 24px; padding: 24px; box-shadow: var(--shadow-glass); max-height: 90vh; overflow-y: auto; }
@@ -171,30 +168,32 @@
 
                 <div class="glass-card"><div class="panel-title">📱 应用管理</div><div id="cards_list" class="list-area"></div><div style="background: rgba(255,255,255,0.03); padding:16px; border-radius:12px; border:1px dashed var(--border-glass);">
                     <div class="form-group"><label>应用名称</label><input id="new_card_title" placeholder="胜天国际"></div>
-                    <div class="form-group"><label>图标</label><div class="file-upload-group"><input type="file" id="new_card_file" accept="image/*" style="display:none;" onchange="handleSupabaseUpload(this.files[0], 'new_card_avatar')"><button class="file-upload-btn" onclick="document.getElementById('new_card_file').click()">📁 选择手机相册图片</button><span class="file-upload-status" id="upload_status">未选择</span></div><input type="text" id="new_card_avatar" placeholder="或者手动粘贴图片网址" style="margin-top:8px;"></div>
+                    <div class="form-group"><label>图标链接 (需手动粘贴图片网络链接)</label><input id="new_card_avatar" placeholder="https://你的图片链接" oninput="previewImg(this.value, 'card_preview')"></div>
                     <div id="card_preview" class="preview-box"><span>预览</span></div>
                     <div class="form-group"><label>跳转链接</label><input id="new_card_link" placeholder="https://..."></div>
                     <div class="form-group" style="flex-wrap:nowrap;"><input id="new_card_order" placeholder="排序" style="flex:1"><select id="new_card_category" style="flex:1"><option value="">选择分类</option></select><label style="display:flex; align-items:center; gap:4px; font-size:13px; color:var(--text-gray); white-space:nowrap;"><input type="checkbox" id="new_card_badge"> 推荐</label></div>
                     <button class="btn btn-grad btn-grad-full" onclick="addItem('cards')">+ 添加应用</button>
                 </div></div>
 
-                <div class="glass-card"><div class="panel-title">🎮 游戏管理</div><div id="ticker_list" class="list-area"></div><div style="background: rgba(255,255,255,0.03); padding:16px; border-radius:12px; border:1px dashed var(--border-glass);"><div class="form-group"><label>游戏名称</label><input id="new_ticker_name" placeholder="奥林匹思之门"></div><div class="form-group"><label>图标</label><div class="file-upload-group"><input type="file" id="new_ticker_file" accept="image/*" style="display:none;" onchange="handleSupabaseUpload(this.files[0], 'new_ticker_icon')"><button class="file-upload-btn" onclick="document.getElementById('new_ticker_file').click()">📁 选择手机相册图片</button><span class="file-upload-status" id="upload_ticker_status">未选择</span></div><input type="text" id="new_ticker_icon" placeholder="或者手动粘贴图片网址" style="margin-top:8px;"></div>
+                <div class="glass-card"><div class="panel-title">🎮 游戏管理</div><div id="ticker_list" class="list-area"></div><div style="background: rgba(255,255,255,0.03); padding:16px; border-radius:12px; border:1px dashed var(--border-glass);"><div class="form-group"><label>游戏名称</label><input id="new_ticker_name" placeholder="奥林匹思之门"></div>
+                    <div class="form-group"><label>图标链接 (需手动粘贴图片网络链接)</label><input id="new_ticker_icon" placeholder="https://..."></div>
                     <div class="form-group"><label>跳转链接</label><input id="new_ticker_link" placeholder="https://..."></div>
                     <button class="btn btn-grad btn-grad-full" onclick="addItem('iconTicker')">+ 添加游戏</button>
                 </div></div>
 
-                <div class="glass-card"><div class="panel-title">🔧 工具管理</div><div id="tools_list" class="list-area"></div><div style="background: rgba(255,255,255,0.03); padding:16px; border-radius:12px; border:1px dashed var(--border-glass);"><div class="form-group"><label>工具名称</label><input id="new_tool_name" placeholder="商务助手"></div><div class="form-group"><label>图标</label><div class="file-upload-group"><input type="file" id="new_tool_file" accept="image/*" style="display:none;" onchange="handleSupabaseUpload(this.files[0], 'new_tool_icon')"><button class="file-upload-btn" onclick="document.getElementById('new_tool_file').click()">📁 选择手机相册图片</button><span class="file-upload-status" id="upload_tool_status">未选择</span></div><input type="text" id="new_tool_icon" placeholder="或者手动粘贴图片网址" style="margin-top:8px;"></div>
+                <div class="glass-card"><div class="panel-title">🔧 工具管理</div><div id="tools_list" class="list-area"></div><div style="background: rgba(255,255,255,0.03); padding:16px; border-radius:12px; border:1px dashed var(--border-glass);"><div class="form-group"><label>工具名称</label><input id="new_tool_name" placeholder="商务助手"></div>
+                    <div class="form-group"><label>图标链接 (需手动粘贴图片网络链接)</label><input id="new_tool_icon" placeholder="https://..."></div>
                     <div class="form-group"><label>跳转链接</label><input id="new_tool_link" placeholder="https://..."></div>
                     <button class="btn btn-grad btn-grad-full" onclick="addItem('toolIcons')">+ 添加工具</button>
                 </div></div>
             </div></div>
 
-            <div id="tab-carousel" class="admin-tab"><div class="glass-card"><div class="panel-title">🖼️ 轮播图列表</div><div id="carousel_list" class="list-area"></div><div style="background: rgba(255,255,255,0.03); padding:16px; border-radius:12px; border:1px dashed var(--border-glass);"><div class="form-group"><label>图片</label><div class="file-upload-group"><input type="file" id="new_carousel_file" accept="image/*" style="display:none;" onchange="handleSupabaseUpload(this.files[0], 'new_carousel_url')"><button class="file-upload-btn" onclick="document.getElementById('new_carousel_file').click()">📁 选择手机相册图片</button><span class="file-upload-status" id="upload_carousel_status">未选择</span></div><input type="text" id="new_carousel_url" placeholder="或者手动粘贴图片网址" style="margin-top:8px;"></div><div class="form-group"><label>跳转链接(选填)</label><input id="new_carousel_link" placeholder="https://xxx.com"></div><button class="btn btn-grad btn-grad-full" onclick="addItem('carousel')">+ 添加轮播</button></div></div></div>
+            <div id="tab-carousel" class="admin-tab"><div class="glass-card"><div class="panel-title">🖼️ 轮播图列表</div><div id="carousel_list" class="list-area"></div><div style="background: rgba(255,255,255,0.03); padding:16px; border-radius:12px; border:1px dashed var(--border-glass);"><div class="form-group"><label>图片地址</label><input id="new_carousel_url" placeholder="https://xxx.webp"></div><div class="form-group"><label>跳转链接(选填)</label><input id="new_carousel_link" placeholder="https://xxx.com"></div><button class="btn btn-grad btn-grad-full" onclick="addItem('carousel')">+ 添加轮播</button></div></div></div>
         </div>
     </div>
 
     <script>
-        // ===================== 1. 配置中心 =====================
+        // ===================== 1. 核心配置 (仅 Firebase) =====================
         const firebaseConfig = {
             apiKey: "AIzaSyCI5yewq1Cu5I38LLjuky9KG1rnKh76W4Q",
             authDomain: "zmvv2011.firebaseapp.com",
@@ -206,11 +205,6 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-
-        const supabaseUrl = 'https://rtszyxyfgzylmxbguaav.supabase.co';
-        const supabaseKey = 'sb_publishable_Odtq8J6e8fSVXnN-MrV5lA_wtd7Tifp';
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
-        const STORAGE_BUCKET = 'nav-icons';
 
         // ===================== 2. 登录与注册 =====================
         const loginWrapper = document.getElementById('loginWrapper');
@@ -265,25 +259,7 @@
             switchMode('modeLogin'); setMsg('请输入账号和密码登录');
         }
 
-        // ===================== 3. 图片上传 =====================
-        async function handleSupabaseUpload(file, targetInputId) {
-            if (!file) return;
-            const statusMap = { 'new_card_avatar': 'upload_status', 'new_ticker_icon': 'upload_ticker_status', 'new_tool_icon': 'upload_tool_status', 'new_carousel_url': 'upload_carousel_status' };
-            const statusId = statusMap[targetInputId];
-            const statusEl = document.getElementById(statusId);
-            const inputEl = document.getElementById(targetInputId);
-            statusEl.textContent = '⏳ 正在上传...';
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${Date.now()}.${fileExt}`;
-            const { data, error } = await supabase.storage.from(STORAGE_BUCKET).upload(fileName, file);
-            if (error) { console.error(error); statusEl.textContent = '❌ 上传失败！'; return; }
-            const publicURL = `${supabaseUrl}/storage/v1/object/public/${STORAGE_BUCKET}/${data.path}`;
-            statusEl.textContent = '✅ 上传成功！';
-            inputEl.value = publicURL;
-            previewImg(publicURL, 'card_preview');
-        }
-
-        // ===================== 4. 编辑功能 =====================
+        // ===================== 3. 编辑功能 =====================
         function openEdit(path, key, data) {
             const modal = document.getElementById('editModal'); modal.classList.add('open');
             document.getElementById('edit_path').value = path; document.getElementById('edit_key').value = key;
@@ -315,7 +291,7 @@
         }
         document.getElementById('editModal').addEventListener('click', function(e) { if (e.target === this) closeEdit(); });
 
-        // ===================== 5. 渲染与列表逻辑 =====================
+        // ===================== 4. 渲染与列表逻辑 =====================
         function previewImg(url, id) { const box = document.getElementById(id); box.innerHTML = url ? `<img src="${url}" onerror="this.parentElement.innerHTML='<span>图片无效</span>'">` : '<span>预览</span>'; }
         function parseToArray(data) { if (!data) return []; return Array.isArray(data) ? data : Object.values(data); }
         let categoryMap = {};
@@ -352,7 +328,7 @@
         }
         function deleteItem(path, key) { if(confirm("确定要删除这条数据吗？")) db.ref(path).child(key).remove(); }
 
-        // ===================== 6. 添加与保存 =====================
+        // ===================== 5. 添加与保存 =====================
         function addItem(path) {
             const map = { 'carousel': ['new_carousel_url', 'new_carousel_link'], 'categories': ['new_cat_id', 'new_cat_name'], 'cards': ['new_card_title', 'new_card_avatar', 'new_card_link', 'new_card_order', 'new_card_category', 'new_card_badge'], 'iconTicker': ['new_ticker_name', 'new_ticker_icon', 'new_ticker_link'], 'toolIcons': ['new_tool_name', 'new_tool_icon', 'new_tool_link'] };
             const ids = map[path]; if(!ids) return;
@@ -376,7 +352,7 @@
             Promise.all([ db.ref('siteConfig').set(data), db.ref('marquee').set(marquee) ]).then(() => alert('✅ 全局配置保存成功！'));
         }
 
-        // ===================== 7. 启动 =====================
+        // ===================== 6. 启动 =====================
         function loadCategorySelect(selectedId) {
             const sel = document.getElementById('new_card_category');
             db.ref('categories').on('value', snap => {
