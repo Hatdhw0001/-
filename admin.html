@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>暗黑极光管理中心</title>
-    <!-- 引入 Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-database-compat.js"></script>
-    <!-- 【保留】手机调试工具 -->
     <script src="https://unpkg.com/vconsole@latest/dist/vconsole.min.js"></script>
     <style>
         :root { --bg-main: #12131a; --bg-card: rgba(31, 33, 46, 0.65); --bg-input: rgba(255, 255, 255, 0.04); --border-glass: rgba(255, 255, 255, 0.08); --text-white: #ffffff; --text-gray: #9ca3af; --primary-purple: #a855f7; --primary-gradient: linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%); --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.5); }
@@ -147,8 +145,8 @@
     <!-- 后台主页 -->
     <div id="dashboardWrapper">
         <div class="mobile-header">
-            <!-- 注意：这里去掉了 onclick，改用 JS 绑定 -->
-            <button class="hamburger" id="menuBtn">☰</button>
+            <!-- 保留 onclick 和 id 双重绑定，确保兼容旧缓存 -->
+            <button class="hamburger" id="menuBtn" onclick="toggleSidebar()">☰</button>
             <div class="title">导航管理中心</div>
             <button onclick="location.reload()" style="background:none; border:none; color:var(--text-gray); font-size:20px;">⟳</button>
         </div>
@@ -200,7 +198,6 @@
     </div>
 
     <script>
-        // 【新增】开启 VConsole 调试工具
         var vConsole = new VConsole();
 
         // ===================== 1. 核心配置 =====================
@@ -298,13 +295,15 @@
             switchMode('modeLogin'); setMsg('请输入账号和密码登录');
         }
 
-        // ===================== 【修复】菜单切换逻辑 =====================
-        function toggleSidebar() {
-            console.log("汉堡菜单被点击了！"); // 你可以用 vConsole 看到这个日志
+        // ===================== 【终极修复】强行挂载菜单切换函数 =====================
+        // 将其绑定到 window 对象，确保 HTML 中的 onclick="toggleSidebar()" 能够找到
+        window.toggleSidebar = function() {
+            console.log("✅ 菜单点击事件已触发！");
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('overlay');
             if (sidebar) {
                 sidebar.classList.toggle('open');
+                console.log("侧边栏状态已切换");
             } else {
                 console.error("找不到 sidebar 元素！");
             }
@@ -313,16 +312,14 @@
             } else {
                 console.error("找不到 overlay 元素！");
             }
-        }
+        };
 
-        // 使用 JS 绑定点击事件，而不是写在 HTML 的 onclick 里（更稳定）
+        // 同时也用 addEventListener 监听一次，双重保障
         document.addEventListener('DOMContentLoaded', function() {
             const menuBtn = document.getElementById('menuBtn');
             if (menuBtn) {
-                menuBtn.addEventListener('click', toggleSidebar);
-                console.log("✅ 汉堡菜单按钮已绑定点击事件");
-            } else {
-                console.error("❌ 找不到 id 为 menuBtn 的汉堡菜单按钮！");
+                menuBtn.addEventListener('click', window.toggleSidebar);
+                console.log("✅ addEventListener 绑定成功");
             }
         });
 
@@ -464,4 +461,4 @@
         initAuth();
     </script>
 </body>
-</html>
+                                                                   </html>
