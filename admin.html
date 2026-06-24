@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>暗黑极光管理中心</title>
-    <!-- 只保留 Firebase SDK -->
+    <!-- 引入 Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-database-compat.js"></script>
+    <!-- 【新增】引入手机端调试工具，如果出错，会在屏幕右下角显示具体原因 -->
+    <script src="https://unpkg.com/vconsole@latest/dist/vconsole.min.js"></script>
     <style>
         :root { --bg-main: #12131a; --bg-card: rgba(31, 33, 46, 0.65); --bg-input: rgba(255, 255, 255, 0.04); --border-glass: rgba(255, 255, 255, 0.08); --text-white: #ffffff; --text-gray: #9ca3af; --primary-purple: #a855f7; --primary-gradient: linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%); --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.5); }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif; }
@@ -193,7 +195,10 @@
     </div>
 
     <script>
-        // ===================== 1. 核心配置 (仅 Firebase) =====================
+        // 【新增】开启 VConsole 调试工具
+        var vConsole = new VConsole();
+
+        // ===================== 1. 核心配置 =====================
         const firebaseConfig = {
             apiKey: "AIzaSyCI5yewq1Cu5I38LLjuky9KG1rnKh76W4Q",
             authDomain: "zmvv2011.firebaseapp.com",
@@ -203,16 +208,35 @@
             messagingSenderId: "793178735751",
             appId: "1:793178735751:web:961c6e801b209e2dcce422"
         };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+
+        // 使用 try...catch 保护初始化，防止浏览器卡死
+        let db = null;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.database();
+            console.log("✅ Firebase 初始化成功");
+        } catch (e) {
+            console.error("❌ Firebase 初始化崩溃:", e);
+            document.getElementById('loginMsg').innerText = "❌ 连接失败: " + e.message;
+            document.getElementById('loginMsg').className = 'login-msg error';
+        }
 
         // ===================== 2. 登录与注册 =====================
         const loginWrapper = document.getElementById('loginWrapper');
         const dashboardWrapper = document.getElementById('dashboardWrapper');
         const msgEl = document.getElementById('loginMsg');
-        function setMsg(text, isError = false) { msgEl.textContent = text; msgEl.className = 'login-msg' + (isError ? ' error' : ''); }
-        function switchMode(modeId) { document.getElementById('modeLogin').classList.remove('active'); document.getElementById('modeRegister').classList.remove('active'); document.getElementById(modeId).classList.add('active'); setMsg(''); }
+        function setMsg(text, isError = false) { 
+            if(!msgEl) return;
+            msgEl.textContent = text; msgEl.className = 'login-msg' + (isError ? ' error' : ''); 
+        }
+        function switchMode(modeId) { 
+            document.getElementById('modeLogin').classList.remove('active');
+            document.getElementById('modeRegister').classList.remove('active');
+            document.getElementById(modeId).classList.add('active'); setMsg(''); 
+        }
+        
         async function handleRegister() {
+            if(!db) return setMsg('⚠️ 数据库未连接', true);
             const user = document.getElementById('regUser').value.trim();
             const pass = document.getElementById('regPass').value.trim();
             const btn = document.getElementById('btnRegister');
@@ -225,9 +249,14 @@
                 await db.ref('admin_users/' + user).set({ password: pass });
                 setMsg('✅ 注册成功！正在自动登录...', false);
                 setTimeout(() => { loginSuccess(user); }, 800);
-            } catch (e) { setMsg('❌ 注册失败：' + e.message, true); btn.disabled = false; }
+            } catch (e) { 
+                console.error("注册错误:", e);
+                setMsg('❌ 注册失败：' + e.message, true); btn.disabled = false; 
+            }
         }
+        
         async function handleLogin() {
+            if(!db) return setMsg('⚠️ 数据库未连接', true);
             const user = document.getElementById('loginUser').value.trim();
             const pass = document.getElementById('loginPass').value.trim();
             const btn = document.getElementById('btnLogin');
@@ -240,8 +269,12 @@
                 if (data.password !== pass) { setMsg('❌ 密码错误！', true); btn.disabled = false; return; }
                 setMsg('✅ 验证通过！正在进入...', false);
                 setTimeout(() => { loginSuccess(user); }, 400);
-            } catch (e) { setMsg('❌ 登录异常：' + e.message, true); btn.disabled = false; }
+            } catch (e) { 
+                console.error("登录错误:", e);
+                setMsg('❌ 登录异常：' + e.message, true); btn.disabled = false; 
+            }
         }
+        
         function loginSuccess(username) {
             localStorage.setItem('admin_user', username);
             loginWrapper.style.display = 'none';
@@ -250,9 +283,11 @@
             document.getElementById('userAvatar').textContent = username.charAt(0).toUpperCase();
             initDashboardApp();
         }
+        
         document.getElementById('logoutBtn').addEventListener('click', function() {
             if(confirm("确定要退出登录吗？")) { localStorage.removeItem('admin_user'); location.reload(); }
         });
+        
         function initAuth() {
             const savedUser = localStorage.getItem('admin_user');
             if (savedUser) { loginSuccess(savedUser); return; }
@@ -274,6 +309,7 @@
         }
         function closeEdit() { document.getElementById('editModal').classList.remove('open'); }
         async function updateItem() {
+            if(!db) return alert('数据库未连接');
             const path = document.getElementById('edit_path').value;
             const key = document.getElementById('edit_key').value;
             const name = document.getElementById('edit_name').value.trim();
@@ -318,18 +354,22 @@
             container.innerHTML = html;
         }
         function listenData(path, containerId, type) {
+            if(!db) return;
             db.ref(path).on('value', snap => {
                 let raw = snap.val(); let items = parseToArray(raw).filter(i => i !== null && typeof i === 'object');
                 if(typeof raw === 'object' && raw !== null && !Array.isArray(raw)) {
                     const keys = Object.keys(raw); items.forEach((item, index) => { item._key = keys[index]; });
                 }
                 renderList(containerId, items, type);
+            }, error => {
+                console.error("读取数据失败:", error);
             });
         }
         function deleteItem(path, key) { if(confirm("确定要删除这条数据吗？")) db.ref(path).child(key).remove(); }
 
         // ===================== 5. 添加与保存 =====================
         function addItem(path) {
+            if(!db) return alert('数据库未连接');
             const map = { 'carousel': ['new_carousel_url', 'new_carousel_link'], 'categories': ['new_cat_id', 'new_cat_name'], 'cards': ['new_card_title', 'new_card_avatar', 'new_card_link', 'new_card_order', 'new_card_category', 'new_card_badge'], 'iconTicker': ['new_ticker_name', 'new_ticker_icon', 'new_ticker_link'], 'toolIcons': ['new_tool_name', 'new_tool_icon', 'new_tool_link'] };
             const ids = map[path]; if(!ids) return;
             let vals = ids.map(id => { const el = document.getElementById(id); return el.type === 'checkbox' ? el.checked : el.value.trim(); });
@@ -347,6 +387,7 @@
             }).catch(e => alert("添加失败："+e.message));
         }
         function saveGlobal() {
+            if(!db) return alert('数据库未连接');
             const data = { siteName: document.getElementById('g_siteName').value, siteLogo: document.getElementById('g_siteLogo').value, header_text: document.getElementById('g_headerText').value, header_href: document.getElementById('g_headerLink').value };
             const marquee = { content: document.getElementById('g_marquee').value };
             Promise.all([ db.ref('siteConfig').set(data), db.ref('marquee').set(marquee) ]).then(() => alert('✅ 全局配置保存成功！'));
@@ -354,6 +395,7 @@
 
         // ===================== 6. 启动 =====================
         function loadCategorySelect(selectedId) {
+            if(!db) return;
             const sel = document.getElementById('new_card_category');
             db.ref('categories').on('value', snap => {
                 let raw = snap.val(); let options = '<option value="">选择分类</option>'; categoryMap = {};
@@ -366,6 +408,7 @@
             });
         }
         function loadDashboardStats() {
+            if(!db) return;
             const today = new Date().toISOString().split('T')[0];
             db.ref('analytics/daily/' + today).once('value').then(snap => { document.getElementById('stat_visits').textContent = snap.val() || 0; });
             Promise.all([db.ref('cards').once('value'), db.ref('iconTicker').once('value'), db.ref('categories').once('value')])
@@ -378,6 +421,7 @@
             visitsRef.on('value', updateChart); clicksRef.on('value', updateChart); gameClicksRef.on('value', updateChart);
         }
         function initDashboardApp() {
+            if(!db) return;
             db.ref('siteConfig').once('value', snap => { let d = snap.val() || {}; document.getElementById('g_siteName').value = d.siteName || ''; document.getElementById('g_siteLogo').value = d.siteLogo || ''; document.getElementById('g_headerText').value = d.header_text || ''; document.getElementById('g_headerLink').value = d.header_href || ''; });
             db.ref('marquee').once('value', snap => { document.getElementById('g_marquee').value = (snap.val()?.content) || ''; });
             loadDashboardStats(); loadCategorySelect();
