@@ -3,35 +3,218 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>管理中心-救急版</title>
-    <!-- 引入手机端调试神器 VConsole -->
-    <script src="https://unpkg.com/vconsole@latest/dist/vconsole.min.js"></script>
-    <script>new VConsole();</script>
-    
+    <title>暗黑极光管理中心</title>
     <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-database-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { background: #12131a; color: #fff; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; font-family: sans-serif; }
-        .login-box { width: 90%; max-width: 380px; background: rgba(31, 33, 46, 0.65); border: 1px solid rgba(255,255,255,0.08); padding: 30px; border-radius: 24px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
-        h2 { text-align: center; margin-bottom: 20px; background: linear-gradient(135deg, #8b5cf6, #d946ef); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        input { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #fff; outline: none; }
-        button { width: 100%; padding: 14px; border: none; border-radius: 12px; background: linear-gradient(135deg, #8b5cf6, #d946ef); color: #fff; font-weight: bold; }
-        #msg { margin-top: 12px; text-align: center; font-size: 14px; min-height: 20px; color: #9ca3af; }
-        #msg.error { color: #ef4444; } #msg.success { color: #22c55e; }
+        :root { --bg-main: #12131a; --bg-card: rgba(31, 33, 46, 0.65); --bg-input: rgba(255, 255, 255, 0.04); --border-glass: rgba(255, 255, 255, 0.08); --text-white: #ffffff; --text-gray: #9ca3af; --primary-purple: #a855f7; --primary-gradient: linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%); --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.5); }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif; }
+        body { background: var(--bg-main); color: var(--text-white); min-height: 100vh; overflow-x: hidden; }
+        body::after { content: ""; position: fixed; inset: 0; z-index: -1; background: radial-gradient(circle at 10% 20%, rgba(168, 85, 247, 0.15), transparent 40%), radial-gradient(circle at 90% 80%, rgba(217, 70, 239, 0.10), transparent 40%); pointer-events: none; }
+        
+        .login-wrapper { position: fixed; inset: 0; background: var(--bg-main); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .login-box { width: 100%; max-width: 380px; background: var(--bg-card); backdrop-filter: blur(16px); border: 1px solid var(--border-glass); border-radius: 24px; padding: 32px 24px; box-shadow: var(--shadow-glass); }
+        .login-box h2 { text-align: center; font-size: 22px; font-weight: 800; margin-bottom: 24px; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .login-mode { display: none; }.login-mode.active { display: block; }
+        .input-row { margin-bottom: 16px; }.input-row label { display: block; font-size: 13px; color: var(--text-gray); font-weight: 500; margin-bottom: 6px; }
+        .input-row input { width: 100%; padding: 12px 14px; background: var(--bg-input); border: 1px solid var(--border-glass); border-radius: 12px; font-size: 15px; color: #fff; outline: none; transition: all 0.3s; }
+        .input-row input:focus { border-color: var(--primary-purple); background: rgba(255,255,255,0.08); box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.15); }
+        .btn-login { width: 100%; padding: 14px; background: var(--primary-gradient); color: #fff; border: none; border-radius: 12px; font-weight: 700; font-size: 16px; cursor: pointer; transition: 0.15s; box-shadow: 0 4px 15px rgba(168, 85, 247, 0.2); }
+        .btn-login:active { transform: scale(0.96); }
+        .btn-link { background: transparent; border: none; color: var(--text-gray); font-size: 14px; text-decoration: underline; cursor: pointer; margin-top: 10px; display: block; text-align: center; }
+        .login-msg { margin-top: 12px; text-align: center; font-size: 14px; min-height: 24px; color: var(--text-gray); }
+        .login-msg.error { color: #ef4444; }.login-msg.success { color: #22c55e; }
+        
+        #dashboardWrapper { display: none; max-width: 1600px; margin: 0 auto; padding: 12px; }
+        .mobile-header { display: none; position: sticky; top: 0; z-index: 50; padding: 12px 0 16px; align-items: center; justify-content: space-between; background: var(--bg-main); }
+        .mobile-header .title { font-size: 18px; font-weight: 800; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hamburger { background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: 12px; font-size: 20px; padding: 8px 12px; color: #fff; backdrop-filter: blur(8px); }
+        .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 260px; background: var(--bg-card); backdrop-filter: blur(20px); border-right: 1px solid var(--border-glass); padding: 24px 16px; display: flex; flex-direction: column; z-index: 999; transition: transform 0.3s; transform: translateX(-100%); box-shadow: 4px 0 40px rgba(0,0,0,0.5); }
+        .sidebar.open { transform: translateX(0); }
+        .brand { display: flex; align-items: center; gap: 12px; font-size: 18px; font-weight: 800; margin-bottom: 32px; }
+        .brand .icon { width: 36px; height: 36px; background: var(--primary-gradient); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; }
+        .menu { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+        .menu a { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; text-decoration: none; color: var(--text-gray); font-weight: 500; font-size: 14px; cursor: pointer; transition: 0.2s; }
+        .menu a i { width: 20px; text-align: center; font-style: normal; }
+        .menu a:hover, .menu a.active { background: rgba(168, 85, 247, 0.15); color: #fff; }
+        .menu a.active { border: 1px solid rgba(168, 85, 247, 0.2); }
+        .user-info { border-top: 1px solid var(--border-glass); padding-top: 16px; margin-top: 16px; display: flex; align-items: center; gap: 12px; }
+        .user-info .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--primary-gradient); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+        .user-info .name { font-size: 14px; font-weight: 600; }.user-info .role { font-size: 12px; color: var(--text-gray); }
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(2px); z-index: 998; display: none; }
+        .overlay.active { display: block; }
+        .main-content { padding: 24px; margin-left: 260px; min-height: 100vh; }
+        @media (max-width: 768px) { .mobile-header { display: flex; } .main-content { margin-left: 0; padding: 0; } .sidebar { width: 280px; } }
+        
+        .glass-card { background: var(--bg-card); backdrop-filter: blur(12px); border: 1px solid var(--border-glass); border-radius: 20px; padding: 20px; box-shadow: var(--shadow-glass); }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; flex: 1; }
+        @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); margin-bottom: 16px; } }
+        .stat-box { position: relative; background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: 16px; padding: 20px; overflow: hidden; box-shadow: var(--shadow-glass); flex: 1; }
+        .stat-box::before { content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: conic-gradient(from 0deg, transparent, var(--primary-purple), transparent 60%); opacity: 0.1; animation: rotate 10s linear infinite; pointer-events: none; }
+        @keyframes rotate { 100% { transform: rotate(360deg); } }
+        .stat-box .num { position: relative; font-size: 28px; font-weight: 800; margin-top: 4px; color: #fff; }
+        .stat-box .lbl { position: relative; font-size: 13px; color: var(--text-gray); font-weight: 500; }
+        
+        .admin-tab { display: none; }.admin-tab.active { display: block; }
+        .panel-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .form-group { margin-bottom: 12px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+        .form-group label { display: block; font-size: 12px; color: var(--text-gray); font-weight: 500; margin-bottom: 4px; width: 100%; }
+        .form-group input, .form-group select { flex: 1; padding: 10px 14px; background: var(--bg-input); border: 1px solid var(--border-glass); border-radius: 10px; font-size: 14px; color: #fff; outline: none; min-width: 100px; transition: 0.2s; }
+        .form-group input:focus, .form-group select:focus { border-color: var(--primary-purple); box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.2); }
+        .form-group select option { background: #1e2030; color: #fff; }
+        .btn { padding: 10px 18px; border: none; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.15s; }
+        .btn:active { transform: scale(0.96); }.btn-grad { background: var(--primary-gradient); color: #fff; box-shadow: 0 4px 12px rgba(168, 85, 247, 0.25); }
+        .btn-grad-full { width: 100%; padding: 12px; }.btn-danger { background: transparent; border: none; color: #f87171; font-size: 13px; padding: 4px 8px; }
+        .btn-icon { background: rgba(255,255,255,0.05); border: 1px solid var(--border-glass); border-radius: 8px; width: 32px; height: 32px; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+
+        .list-area { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+        .list-item { display: flex; align-items: center; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-glass); border-radius: 12px; padding: 10px 14px; gap: 12px; position: relative; flex-shrink: 0; }
+        .list-item img { width: 32px; height: 32px; border-radius: 8px; background: var(--bg-input); object-fit: cover; border: 1px solid var(--border-glass); flex-shrink: 0; }
+        .list-item .info { display: flex; flex-direction: column; overflow: hidden; flex: 1; }
+        .list-item .info .main-title { font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .list-item .info .sub-title { font-size: 11px; color: var(--text-gray); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .list-item .badge { position: absolute; top: -6px; right: -6px; background: #ef4444; color: #fff; font-size: 10px; padding: 2px 8px; border-radius: 12px; box-shadow: 0 2px 6px rgba(239,68,68,0.4); }
+        .list-item .actions { display: flex; gap: 6px; flex-shrink: 0; }
+        .list-item .actions .btn-edit { background: transparent; border: none; color: #60a5fa; font-size: 12px; padding: 4px 8px; }
+        .list-item .actions .btn-del { background: transparent; border: none; color: #f87171; font-size: 12px; padding: 4px 8px; }
+        .empty-tip { color: var(--text-gray); text-align: center; padding: 20px 0; font-size: 14px; }
+
+        .preview-box { width: 48px; height: 48px; background: var(--bg-input); border-radius: 10px; border: 1px solid var(--border-glass); display: flex; align-items: center; justify-content: center; margin-top: 4px; color: var(--text-gray); }
+        .preview-box img { width: 100%; height: 100%; object-fit: cover; display: none; border-radius: 10px; }
+
+        .content-stack { display: flex; flex-direction: column; gap: 24px; width: 100%; }
+        .content-stack .glass-card { width: 100%; margin-bottom: 0; }
+        .dashboard-top { display: flex; gap: 24px; flex-wrap: wrap; }
+        .dashboard-stats-col { flex: 3; min-width: 250px; }
+        .dashboard-chart-col { flex: 1; min-width: 180px; display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-start; border-left: 1px solid rgba(255,255,255,0.05); padding-left: 20px; }
+        @media (max-width: 768px) { .dashboard-top { flex-direction: column-reverse; } .dashboard-chart-col { border-left: none; border-top: 1px solid rgba(255,255,255,0.05); padding-left: 0; padding-top: 16px; align-items: center; } }
+        .donut-container { position: relative; width: 120px; height: 120px; margin-bottom: 12px; }
+        .donut-chart { width: 120px; height: 120px; border-radius: 50%; transition: background 0.5s ease; display: flex; justify-content: center; align-items: center; }
+        .donut-hole { width: 70px; height: 70px; border-radius: 50%; background: #1e2030; display: flex; justify-content: center; align-items: center; font-size: 12px; color: var(--text-gray); font-weight: 600; }
+        .legend-list { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-gray); }
+        .legend-item .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .legend-item .dot.yellow { background: #eab308; }.legend-item .dot.purple { background: #8b5cf6; }.legend-item .dot.green { background: #22c55e; }
+        .legend-item .val { margin-left: auto; color: #fff; font-weight: 600; }
+
+        .file-upload-group { display: flex; gap: 10px; align-items: center; background: rgba(255,255,255,0.03); padding: 8px 12px; border-radius: 10px; border: 1px dashed var(--border-glass); margin-top: 4px; }
+        .file-upload-btn { background: transparent; border: none; color: var(--text-gray); cursor: pointer; font-size: 13px; flex:1;}
+        .file-upload-status { font-size: 12px; color: var(--text-gray); }
+
+        /* 新增：编辑面板模态框样式 */
+        .edit-modal { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(18, 19, 26, 0.8); backdrop-filter: blur(4px); padding: 20px; align-items: center; justify-content: center; }
+        .edit-modal.open { display: flex; }
+        .edit-modal .modal-box { width: 100%; max-width: 460px; background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: 24px; padding: 24px; box-shadow: var(--shadow-glass); max-height: 90vh; overflow-y: auto; }
+        .edit-modal .modal-box .panel-title { margin-bottom: 16px; }
+        .edit-modal .actions-row { display: flex; gap: 10px; margin-top: 16px; }
+        .edit-modal .actions-row .btn { flex: 1; text-align: center; }
     </style>
 </head>
 <body>
+    <!-- ================= 编辑模态框 ================= -->
+    <div class="edit-modal" id="editModal">
+        <div class="modal-box">
+            <div class="panel-title" id="editTitle">✏️ 编辑数据</div>
+            <input type="hidden" id="edit_path">
+            <input type="hidden" id="edit_key">
 
-    <div class="login-box">
-        <h2>⚡ 管理中心</h2>
-        <input type="text" id="loginUser" placeholder="用户名">
-        <input type="password" id="loginPass" placeholder="密码">
-        <button onclick="handleLogin()">🚀 登 录</button>
-        <div id="msg">正在连接数据库...</div>
+            <div class="form-group"><label>名称</label><input id="edit_name" placeholder="输入名称"></div>
+            <div class="form-group"><label>图标链接</label><input id="edit_avatar" placeholder="输入图标URL" oninput="previewImg(this.value, 'edit_preview')"></div>
+            <div id="edit_preview" class="preview-box"><span>预览</span></div>
+            <div class="form-group"><label>跳转链接</label><input id="edit_link" placeholder="输入点击跳转的网址"></div>
+            <div class="form-group" style="flex-wrap:nowrap;">
+                <input id="edit_order" placeholder="排序数字" style="flex:1">
+                <select id="edit_category" style="flex:1"><option value="">选择分类</option></select>
+                <label style="display:flex; align-items:center; gap:4px; font-size:13px; color:var(--text-gray); white-space:nowrap;"><input type="checkbox" id="edit_badge"> 推荐</label>
+            </div>
+            <div class="actions-row">
+                <button class="btn" style="background:rgba(255,255,255,0.1); color:#fff;" onclick="closeEdit()">取消</button>
+                <button class="btn btn-grad" onclick="updateItem()">💾 保存修改</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= 登录/注册 ================= -->
+    <div class="login-wrapper" id="loginWrapper">
+        <div class="login-box">
+            <h2>⚡ 管理中心</h2>
+            <div class="login-mode" id="modeLogin">
+                <div class="input-row"><label>👤 用户名</label><input type="text" id="loginUser" placeholder="输入用户名" onkeydown="if(event.key==='Enter') handleLogin()"></div>
+                <div class="input-row"><label>🔑 密码</label><input type="password" id="loginPass" placeholder="输入密码" onkeydown="if(event.key==='Enter') handleLogin()"></div>
+                <button class="btn-login" id="btnLogin" onclick="handleLogin()">🚀 登 录</button>
+                <button class="btn-link" onclick="switchMode('modeRegister')">还没有账号？点此注册</button>
+            </div>
+            <div class="login-mode" id="modeRegister">
+                <div class="input-row"><label>👤 设置用户名</label><input type="text" id="regUser" placeholder="自定义用户名" onkeydown="if(event.key==='Enter') handleRegister()"></div>
+                <div class="input-row"><label>🔑 设置密码 (至少4位)</label><input type="password" id="regPass" placeholder="输入密码" onkeydown="if(event.key==='Enter') handleRegister()"></div>
+                <button class="btn-login" id="btnRegister" onclick="handleRegister()">📝 注册新账号</button>
+                <button class="btn-link" onclick="switchMode('modeLogin')">已有账号？点此登录</button>
+            </div>
+            <div class="login-msg" id="loginMsg">连接数据库进行身份校验...</div>
+        </div>
+    </div>
+
+    <!-- ================= 后台主页 ================= -->
+    <div id="dashboardWrapper">
+        <div class="mobile-header"><button class="hamburger" onclick="toggleSidebar()">☰</button><div class="title">导航管理中心</div><button onclick="location.reload()" style="background:none; border:none; color:var(--text-gray); font-size:20px;">⟳</button></div>
+        <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+        <div class="sidebar" id="sidebar">
+            <div class="brand"><div class="icon">◉</div><span>极光中心</span></div>
+            <div class="menu" id="menuTabs">
+                <a class="active" data-target="tab-dashboard"><i>📊</i> 数据看板</a>
+                <a data-target="tab-global"><i>⚙️</i> 全局配置</a>
+                <a data-target="tab-contents"><i>📦</i> 内容总控</a>
+                <a data-target="tab-carousel"><i>🖼️</i> 轮播管理</a>
+                <a href="#" id="logoutBtn" style="color:#ef4444; margin-top:10px;"><i>🚪</i> 退出登录</a>
+            </div>
+            <div class="user-info"><div class="avatar" id="userAvatar">A</div><div><div class="name" id="userNameDisplay">管理员</div><div class="role">全权控制</div></div></div>
+        </div>
+
+        <div class="main-content">
+            <!-- 看板 -->
+            <div id="tab-dashboard" class="admin-tab active"><div class="glass-card" style="border: 1px solid rgba(168, 85, 247, 0.2);"><div class="dashboard-top"><div class="dashboard-stats-col"><div class="panel-title">📊 平台数据总览</div><div class="stats-grid"><div class="stat-box"><div class="lbl">📈 今日访问量</div><div class="num" id="stat_visits">--</div></div><div class="stat-box"><div class="lbl">📱 应用总数</div><div class="num" id="stat_cards">--</div></div><div class="stat-box"><div class="lbl">🎮 游戏总数</div><div class="num" id="stat_games">--</div></div><div class="stat-box"><div class="lbl">🏷️ 分类总数</div><div class="num" id="stat_categories">--</div></div></div></div><div class="dashboard-chart-col"><div class="panel-title" style="font-size: 13px; color: var(--text-gray); font-weight: 500; margin-bottom: 8px; width: 100%; text-align: left;">用户数据占比统计</div><div class="donut-container"><div class="donut-chart" id="realDonutChart"><div class="donut-hole" id="chartTotal">总计</div></div></div><div class="legend-list"><div class="legend-item"><span class="dot yellow"></span> 访客数据 <span class="val" id="chartVisits">0</span></div><div class="legend-item"><span class="dot purple"></span> 总点击量 <span class="val" id="chartClicks">0</span></div><div class="legend-item"><span class="dot green"></span> 游戏点击量 <span class="val" id="chartGameClicks">0</span></div></div><div style="font-size: 10px; color: rgba(255,255,255,0.2); margin-top: 6px; text-align: center; width: 100%;">数据实时同步于 Firebase</div></div></div></div></div>
+
+            <!-- 全局配置 -->
+            <div id="tab-global" class="admin-tab"><div class="content-stack"><div class="glass-card"><div class="panel-title">⚙️ 基础信息设置</div><div class="form-group"><label>网站标题</label><input id="g_siteName" placeholder="非凡人生"></div><div class="form-group"><label>Logo路径</label><input id="g_siteLogo" placeholder="sjb88.webp"></div><button class="btn btn-grad" onclick="saveGlobal()" style="margin-top:8px;">保存配置</button></div><div class="glass-card"><div class="panel-title">🔗 快捷链接配置</div><div class="form-group"><label>右上角按钮文字</label><input id="g_headerText" placeholder="旺旺联系25392429"></div><div class="form-group"><label>右上角按钮链接</label><input id="g_headerLink" placeholder="https://链接"></div><div class="form-group"><label>跑马灯文字</label><input id="g_marquee" placeholder="🔥 今日推荐"></div></div></div></div>
+
+            <!-- 内容总控 -->
+            <div id="tab-contents" class="admin-tab"><div class="panel-header"><div class="panel-title" style="margin-bottom:0;">📦 数据管理 (分类 · 应用 · 游戏 · 工具)</div><button class="btn-icon" onclick="location.reload()" title="重新加载数据">⟳</button></div><div class="content-stack">
+                
+                <!-- 分类 -->
+                <div class="glass-card"><div class="panel-title">🏷️ 分类管理</div><div id="categories_list" class="list-area"></div><div style="background: rgba(255,255,255,0.03); padding:16px; border-radius:12px; border:1px dashed var(--border-glass);"><div class="form-group"><input id="new_cat_id" placeholder="分类ID" style="flex:1"><input id="new_cat_name" placeholder="分类名称" style="flex:2"></div><button class="btn btn-grad btn-grad-full" onclick="addItem('categories')">+ 添加分类</button></div></div>
+
+                <!-- 应用 -->
+                <div class="glass-card"><div class="panel-title">📱 应用管理</div><div id="cards_list" class="list-area"></div><div style="background: rgba(255,255,255,0.03); padding:16px; border-radius:12px; border:1px dashed var(--border-glass);">
+                    <div class="form-group"><label>应用名称</label><input id="new_card_title" placeholder="胜天国际"></div>
+                    <div class="form-group"><label>图标</label><div class="file-upload-group"><input type="file" id="new_card_file" accept="image/*" style="display:none;" onchange="handleSupabaseUpload(this.files[0], 'new_card_avatar')"><button class="file-upload-btn" onclick="document.getElementById('new_card_file').click()">📁 选择手机相册图片</button><span class="file-upload-status" id="upload_status">未选择</span></div><input type="text" id="new_card_avatar" placeholder="或者手动粘贴图片网址" style="margin-top:8px;"></div>
+                    <div id="card_preview" class="preview-box"><span>预览</span></div>
+                    <div class="form-group"><label>跳转链接</label><input id="new_card_link" placeholder="https://..."></div>
+                    <div class="form-group" style="flex-wrap:nowrap;"><input id="new_card_order" placeholder="排序" style="flex:1"><select id="new_card_category" style="flex:1"><option value="">选择分类</option></select><label style="display:flex; align-items:center; gap:4px; font-size:13px; color:var(--text-gray); white-space:nowrap;"><input type="checkbox" id="new_card_badge"> 推荐</label></div>
+                    <button class="btn btn-grad btn-grad-full" onclick="addItem('cards')">+ 添加应用</button>
+                </div></div>
+
+                <!-- 游戏 (新增链接) -->
+                <div class="glass-card"><div class="panel-title">🎮 游戏管理</div><div id="ticker_list" class="list-area"></div><div style="background: rgba(255,255,255,0.03); padding:16px; border-radius:12px; border:1px dashed var(--border-glass);"><div class="form-group"><label>游戏名称</label><input id="new_ticker_name" placeholder="奥林匹思之门"></div><div class="form-group"><label>图标</label><div class="file-upload-group"><input type="file" id="new_ticker_file" accept="image/*" style="display:none;" onchange="handleSupabaseUpload(this.files[0], 'new_ticker_icon')"><button class="file-upload-btn" onclick="document.getElementById('new_ticker_file').click()">📁 选择手机相册图片</button><span class="file-upload-status" id="upload_ticker_status">未选择</span></div><input type="text" id="new_ticker_icon" placeholder="或者手动粘贴图片网址" style="margin-top:8px;"></div>
+                    <div class="form-group"><label>跳转链接</label><input id="new_ticker_link" placeholder="https://..."></div>
+                    <button class="btn btn-grad btn-grad-full" onclick="addItem('iconTicker')">+ 添加游戏</button>
+                </div></div>
+
+                <!-- 工具 (新增链接) -->
+                <div class="glass-card"><div class="panel-title">🔧 工具管理</div><div id="tools_list" class="list-area"></div><div style="background: rgba(255,255,255,0.03); padding:16px; border-radius:12px; border:1px dashed var(--border-glass);"><div class="form-group"><label>工具名称</label><input id="new_tool_name" placeholder="商务助手"></div><div class="form-group"><label>图标</label><div class="file-upload-group"><input type="file" id="new_tool_file" accept="image/*" style="display:none;" onchange="handleSupabaseUpload(this.files[0], 'new_tool_icon')"><button class="file-upload-btn" onclick="document.getElementById('new_tool_file').click()">📁 选择手机相册图片</button><span class="file-upload-status" id="upload_tool_status">未选择</span></div><input type="text" id="new_tool_icon" placeholder="或者手动粘贴图片网址" style="margin-top:8px;"></div>
+                    <div class="form-group"><label>跳转链接</label><input id="new_tool_link" placeholder="https://..."></div>
+                    <button class="btn btn-grad btn-grad-full" onclick="addItem('toolIcons')">+ 添加工具</button>
+                </div></div>
+            </div></div>
+
+            <!-- 轮播 -->
+            <div id="tab-carousel" class="admin-tab"><div class="glass-card"><div class="panel-title">🖼️ 轮播图列表</div><div id="carousel_list" class="list-area"></div><div style="background: rgba(255,255,255,0.03); padding:16px; border-radius:12px; border:1px dashed var(--border-glass);"><div class="form-group"><label>图片</label><div class="file-upload-group"><input type="file" id="new_carousel_file" accept="image/*" style="display:none;" onchange="handleSupabaseUpload(this.files[0], 'new_carousel_url')"><button class="file-upload-btn" onclick="document.getElementById('new_carousel_file').click()">📁 选择手机相册图片</button><span class="file-upload-status" id="upload_carousel_status">未选择</span></div><input type="text" id="new_carousel_url" placeholder="或者手动粘贴图片网址" style="margin-top:8px;"></div><div class="form-group"><label>跳转链接(选填)</label><input id="new_carousel_link" placeholder="https://xxx.com"></div><button class="btn btn-grad btn-grad-full" onclick="addItem('carousel')">+ 添加轮播</button></div></div></div>
+        </div>
     </div>
 
     <script>
-        // 你的 Firebase 配置
+        // ===================== 1. 系统配置 =====================
         const firebaseConfig = {
             apiKey: "AIzaSyCI5yewq1Cu5I38LLjuky9KG1rnKh76W4Q",
             authDomain: "zmvv2011.firebaseapp.com",
@@ -41,48 +224,174 @@
             messagingSenderId: "793178735751",
             appId: "1:793178735751:web:961c6e801b209e2dcce422"
         };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-        const msgEl = document.getElementById('msg');
-        function setMsg(txt, isError = false) { msgEl.textContent = txt; msgEl.className = isError ? 'error' : ''; }
+        const supabaseUrl = 'https://rtszyxyfgzylmxbguaav.supabase.co';
+        const supabaseKey = 'sb_publishable_Odtq8J6e8fSVXnN-MrV5lA_wtd7Tifp';
+        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+        const STORAGE_BUCKET = 'nav-icons';
 
-        // 尝试初始化
-        try {
-            firebase.initializeApp(firebaseConfig);
-            const db = firebase.database();
-            setMsg("✅ Firebase 连接成功！等待验证...");
-            window.db = db; // 暴露给全局方便调试
-        } catch (err) {
-            setMsg("❌ 初始化崩溃: " + err.message, true);
+        // ===================== 2. 登录逻辑 =====================
+        const loginWrapper = document.getElementById('loginWrapper');
+        const dashboardWrapper = document.getElementById('dashboardWrapper');
+        const msgEl = document.getElementById('loginMsg');
+        function setMsg(text, isError = false) { msgEl.textContent = text; msgEl.className = 'login-msg' + (isError ? ' error' : ''); }
+        function switchMode(modeId) { document.getElementById('modeLogin').classList.remove('active'); document.getElementById('modeRegister').classList.remove('active'); document.getElementById(modeId).classList.add('active'); setMsg(''); }
+        async function handleRegister() { const user = document.getElementById('regUser').value.trim(); const pass = document.getElementById('regPass').value.trim(); const btn = document.getElementById('btnRegister'); if (!user || !pass) return setMsg('⚠️ 用户名和密码不能为空！', true); if (pass.length < 4) return setMsg('⚠️ 密码长度不能少于4位！', true); btn.disabled = true; setMsg('⏳ 正在检查用户名...'); try { const snap = await db.ref('admin_users/' + user).once('value'); if (snap.exists()) { setMsg('❌ 该用户名已被注册！', true); btn.disabled = false; return; } await db.ref('admin_users/' + user).set({ password: pass }); setMsg('✅ 注册成功！正在自动登录...', false); setTimeout(() => { loginSuccess(user); }, 800); } catch (e) { setMsg('❌ 注册失败：' + e.message, true); btn.disabled = false; } }
+        async function handleLogin() { const user = document.getElementById('loginUser').value.trim(); const pass = document.getElementById('loginPass').value.trim(); const btn = document.getElementById('btnLogin'); if (!user || !pass) return setMsg('⚠️ 请输入用户名和密码！', true); btn.disabled = true; setMsg('⏳ 正在验证身份...'); try { const snap = await db.ref('admin_users/' + user).once('value'); if (!snap.exists()) { setMsg('❌ 用户名不存在，请先注册！', true); btn.disabled = false; return; } const data = snap.val(); if (data.password !== pass) { setMsg('❌ 密码错误！', true); btn.disabled = false; return; } setMsg('✅ 验证通过！正在进入...', false); setTimeout(() => { loginSuccess(user); }, 400); } catch (e) { setMsg('❌ 登录异常：' + e.message, true); btn.disabled = false; } }
+        function loginSuccess(username) { localStorage.setItem('admin_user', username); loginWrapper.style.display = 'none'; dashboardWrapper.style.display = 'block'; document.getElementById('userNameDisplay').textContent = username; document.getElementById('userAvatar').textContent = username.charAt(0).toUpperCase(); initDashboardApp(); }
+        document.getElementById('logoutBtn').addEventListener('click', function() { if(confirm("确定要退出登录吗？")) { localStorage.removeItem('admin_user'); location.reload(); } });
+        function initAuth() { const savedUser = localStorage.getItem('admin_user'); if (savedUser) { loginSuccess(savedUser); return; } switchMode('modeLogin'); setMsg('请输入账号和密码登录'); }
+
+        // ===================== 3. 图片上传 =====================
+        async function handleSupabaseUpload(file, targetInputId) {
+            if (!file) return;
+            const statusMap = { 'new_card_avatar': 'upload_status', 'new_ticker_icon': 'upload_ticker_status', 'new_tool_icon': 'upload_tool_status', 'new_carousel_url': 'upload_carousel_status' };
+            const statusId = statusMap[targetInputId];
+            const statusEl = document.getElementById(statusId);
+            const inputEl = document.getElementById(targetInputId);
+            statusEl.textContent = '⏳ 正在上传...';
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Date.now()}.${fileExt}`;
+            const { data, error } = await supabase.storage.from(STORAGE_BUCKET).upload(fileName, file);
+            if (error) { console.error(error); statusEl.textContent = '❌ 上传失败！'; alert("上传到 Supabase 失败: " + error.message); return; }
+            const publicURL = `${supabaseUrl}/storage/v1/object/public/${STORAGE_BUCKET}/${data.path}`;
+            statusEl.textContent = '✅ 上传成功！';
+            inputEl.value = publicURL;
+            previewImg(publicURL, 'card_preview');
         }
 
-        // 登录验证
-        async function handleLogin() {
-            const user = document.getElementById('loginUser').value.trim();
-            const pass = document.getElementById('loginPass').value.trim();
-            if(!user || !pass) return setMsg("⚠️ 请输入用户名和密码", true);
-            
-            setMsg("⏳ 正在验证身份...");
-            try {
-                // 读取 admin_users 节点
-                const snap = await window.db.ref('admin_users/' + user).once('value');
-                
-                if (!snap.exists()) {
-                    setMsg("❌ 用户名不存在，请先注册！", true);
-                    return;
-                }
-                const data = snap.val();
-                if (data.password !== pass) {
-                    setMsg("❌ 密码错误！", true);
-                    return;
-                }
-                setMsg("✅ 验证通过！正在进入后台...", false);
-                alert("登录成功！你的数据没问题。请继续使用完整版 admin.html");
-                
-            } catch (e) {
-                console.error("🔥 报错了：", e);
-                setMsg("❌ 读取失败：" + e.message + " (请看右下角绿按钮内的 Log)", true);
+        // ===================== 4. 编辑功能核心 =====================
+        function openEdit(path, key, data) {
+            const modal = document.getElementById('editModal');
+            modal.classList.add('open');
+            document.getElementById('edit_path').value = path;
+            document.getElementById('edit_key').value = key;
+            document.getElementById('edit_name').value = data.title || data.name || '';
+            document.getElementById('edit_avatar').value = data.avatar || data.icon || data.url || '';
+            document.getElementById('edit_link').value = data.linkUrl || data.link || '';
+            document.getElementById('edit_order').value = data.order || '';
+            document.getElementById('edit_category').value = data.categoryId || '';
+            document.getElementById('edit_badge').checked = !!(data.badgeText);
+            previewImg(document.getElementById('edit_avatar').value, 'edit_preview');
+            document.getElementById('editTitle').textContent = `✏️ 编辑 ${data.title || data.name || '数据'}`;
+        }
+        function closeEdit() { document.getElementById('editModal').classList.remove('open'); }
+        async function updateItem() {
+            const path = document.getElementById('edit_path').value;
+            const key = document.getElementById('edit_key').value;
+            const name = document.getElementById('edit_name').value.trim();
+            const avatar = document.getElementById('edit_avatar').value.trim();
+            const link = document.getElementById('edit_link').value.trim();
+            const order = parseInt(document.getElementById('edit_order').value) || 0;
+            const categoryId = parseInt(document.getElementById('edit_category').value) || 0;
+            const badge = document.getElementById('edit_badge').checked;
+            if (!name) { alert("名称不能为空！"); return; }
+            let updateData = {};
+            if (path === 'cards') { updateData = { title: name, avatar: avatar, linkUrl: link, order: order, categoryId: categoryId, badgeText: badge ? '推荐' : '' }; }
+            else if (path === 'iconTicker' || path === 'toolIcons') { updateData = { name: name, icon: avatar, linkUrl: link }; }
+            else if (path === 'carousel') { updateData = { url: avatar, link: link }; }
+            try { await db.ref(path).child(key).update(updateData); alert('✅ 修改成功！'); closeEdit(); } catch (e) { alert('❌ 修改失败：' + e.message); }
+        }
+        document.getElementById('editModal').addEventListener('click', function(e) { if (e.target === this) closeEdit(); });
+
+        // ===================== 5. 列表渲染与操作逻辑 =====================
+        function previewImg(url, id) { const box = document.getElementById(id); box.innerHTML = url ? `<img src="${url}" onerror="this.parentElement.innerHTML='<span>图片无效</span>'">` : '<span>预览</span>'; }
+        function parseToArray(data) { if (!data) return []; return Array.isArray(data) ? data : Object.values(data); }
+        let categoryMap = {};
+        function renderList(containerId, data, type) {
+            const container = document.getElementById(containerId);
+            if(!data || data.length === 0) { container.innerHTML = '<div class="empty-tip">暂无数据，请在下方添加</div>'; return; }
+            let html = '';
+            if(type === 'cards') {
+                data.forEach(item => {
+                    const title = item.title || item.name || '未命名';
+                    const avatar = item.avatar || item.icon || item.url || '';
+                    const badge = item.badgeText ? `<div class="badge">${item.badgeText}</div>` : '';
+                    const catName = (item.categoryId !== undefined && categoryMap[item.categoryId]) ? `📂 归属分类: ${categoryMap[item.categoryId]}` : '未归类';
+                    html += `<div class="list-item"><img src="${avatar}" onerror="this.src='https://via.placeholder.com/32/3a4156/ffffff?text=!'"><div class="info"><div class="main-title">${title}</div><div class="sub-title">${catName}</div></div>${badge}<div class="actions"><button class="btn-edit" onclick='openEdit("${type}", "${item._key}", ${JSON.stringify(item).replace(/'/g, "&#39;")})'>编辑</button><button class="btn-del" onclick="deleteItem('${type}', '${item._key}')">删除</button></div></div>`;
+                });
+            } else {
+                data.forEach(item => {
+                    const name = item.name || item.title || '未命名';
+                    const avatar = item.icon || item.url || item.avatar || '';
+                    const linkInfo = item.linkUrl ? `🔗 链接: ${item.linkUrl.substring(0, 15)}...` : '未设置链接';
+                    html += `<div class="list-item"><img src="${avatar}" onerror="this.src='https://via.placeholder.com/32/3a4156/ffffff?text=!'"><div class="info"><div class="main-title">${name}</div><div class="sub-title">${linkInfo}</div></div><div class="actions"><button class="btn-edit" onclick='openEdit("${type}", "${item._key}", ${JSON.stringify(item).replace(/'/g, "&#39;")})'>编辑</button><button class="btn-del" onclick="deleteItem('${type}', '${item._key}')">删除</button></div></div>`;
+                });
             }
+            container.innerHTML = html;
         }
+        function listenData(path, containerId, type) {
+            db.ref(path).on('value', snap => {
+                let raw = snap.val(); let items = parseToArray(raw).filter(i => i !== null && typeof i === 'object');
+                if(typeof raw === 'object' && raw !== null && !Array.isArray(raw)) {
+                    const keys = Object.keys(raw); items.forEach((item, index) => { item._key = keys[index]; });
+                }
+                renderList(containerId, items, type);
+            });
+        }
+        function deleteItem(path, key) { if(confirm("确定要删除这条数据吗？")) db.ref(path).child(key).remove(); }
+
+        // ===================== 6. 添加与保存逻辑 =====================
+        function addItem(path) {
+            const map = { 'carousel': ['new_carousel_url', 'new_carousel_link'], 'categories': ['new_cat_id', 'new_cat_name'], 'cards': ['new_card_title', 'new_card_avatar', 'new_card_link', 'new_card_order', 'new_card_category', 'new_card_badge'], 'iconTicker': ['new_ticker_name', 'new_ticker_icon', 'new_ticker_link'], 'toolIcons': ['new_tool_name', 'new_tool_icon', 'new_tool_link'] };
+            const ids = map[path]; if(!ids) return;
+            let vals = ids.map(id => { const el = document.getElementById(id); return el.type === 'checkbox' ? el.checked : el.value.trim(); });
+            if(!vals[0]) return alert("请填写必填信息！");
+            let data = {}; let addedId = 0;
+            if(path === 'carousel') data = { url: vals[0], link: vals[1] };
+            else if(path === 'categories') { data = { id: Number(vals[0]), name: vals[1] }; addedId = Number(vals[0]); }
+            else if(path === 'cards') data = { title: vals[0], avatar: vals[1], linkUrl: vals[2], order: Number(vals[3]), categoryId: Number(vals[4]) || 0, badgeText: vals[5] ? '推荐' : '' };
+            else if(path === 'iconTicker') data = { name: vals[0], icon: vals[1], linkUrl: vals[2] };
+            else if(path === 'toolIcons') data = { name: vals[0], icon: vals[1], linkUrl: vals[2] };
+            db.ref(path).push(data).then(() => {
+                ids.forEach(id => { const el = document.getElementById(id); if(el.type === 'checkbox') el.checked = false; else el.value = ''; });
+                if(path === 'cards') document.getElementById('card_preview').innerHTML = '<span>预览</span>';
+                if(path === 'categories') loadCategorySelect(addedId);
+            }).catch(e => alert("添加失败："+e.message));
+        }
+
+        function saveGlobal() {
+            const data = { siteName: document.getElementById('g_siteName').value, siteLogo: document.getElementById('g_siteLogo').value, header_text: document.getElementById('g_headerText').value, header_href: document.getElementById('g_headerLink').value };
+            const marquee = { content: document.getElementById('g_marquee').value };
+            Promise.all([ db.ref('siteConfig').set(data), db.ref('marquee').set(marquee) ]).then(() => alert('✅ 全局配置保存成功！'));
+        }
+
+        // ===================== 7. 启动 =====================
+        function loadCategorySelect(selectedId) {
+            const sel = document.getElementById('new_card_category');
+            db.ref('categories').on('value', snap => {
+                let raw = snap.val(); let options = '<option value="">选择分类</option>'; categoryMap = {};
+                if (raw) {
+                    let items = parseToArray(raw).filter(i => i !== null && typeof i === 'object');
+                    items.sort((a, b) => (a.id || 0) - (b.id || 0));
+                    items.forEach(item => { if (item.id !== undefined && item.name) { categoryMap[item.id] = item.name; let selected = (selectedId && Number(item.id) === Number(selectedId)) ? ' selected' : ''; options += `<option value="${item.id}"${selected}>${item.id} - ${item.name}</option>`; } });
+                } else { options = '<option value="">暂无分类，请先在分类管理中添加</option>'; }
+                sel.innerHTML = options;
+            });
+        }
+        function loadDashboardStats() {
+            const today = new Date().toISOString().split('T')[0];
+            db.ref('analytics/daily/' + today).once('value').then(snap => { document.getElementById('stat_visits').textContent = snap.val() || 0; });
+            Promise.all([db.ref('cards').once('value'), db.ref('iconTicker').once('value'), db.ref('categories').once('value')])
+                .then(([cSnap, gSnap, catSnap]) => { document.getElementById('stat_cards').textContent = cSnap.val() ? Object.keys(cSnap.val()).length : 0; document.getElementById('stat_games').textContent = gSnap.val() ? Object.keys(gSnap.val()).length : 0; document.getElementById('stat_categories').textContent = catSnap.val() ? Object.keys(catSnap.val()).length : 0; });
+            const visitsRef = db.ref('analytics/daily/' + today); const clicksRef = db.ref('analytics/total_clicks'); const gameClicksRef = db.ref('analytics/game_clicks');
+            const updateChart = () => {
+                Promise.all([visitsRef.once('value'), clicksRef.once('value'), gameClicksRef.once('value')])
+                .then(([vSnap, cSnap, gSnap]) => { let visits = vSnap.val() || 0; let clicks = cSnap.val() || 0; let gameClicks = gSnap.val() || 0; document.getElementById('chartVisits').textContent = visits; document.getElementById('chartClicks').textContent = clicks; document.getElementById('chartGameClicks').textContent = gameClicks; const total = visits + clicks + gameClicks; document.getElementById('chartTotal').textContent = total > 0 ? total : '暂无'; if (total === 0) { document.getElementById('realDonutChart').style.background = '#2d3748'; } else { const visitsPerc = (visits / total) * 100; const clicksPerc = (clicks / total) * 100; const gamePerc = (gameClicks / total) * 100; const p1 = visitsPerc; const p2 = visitsPerc + clicksPerc; document.getElementById('realDonutChart').style.background = `conic-gradient(#eab308 0% ${p1}%, #8b5cf6 ${p1}% ${p2}%, #22c55e ${p2}% 100%)`; } });
+            };
+            visitsRef.on('value', updateChart); clicksRef.on('value', updateChart); gameClicksRef.on('value', updateChart);
+        }
+        function initDashboardApp() {
+            db.ref('siteConfig').once('value', snap => { let d = snap.val() || {}; document.getElementById('g_siteName').value = d.siteName || ''; document.getElementById('g_siteLogo').value = d.siteLogo || ''; document.getElementById('g_headerText').value = d.header_text || ''; document.getElementById('g_headerLink').value = d.header_href || ''; });
+            db.ref('marquee').once('value', snap => { document.getElementById('g_marquee').value = (snap.val()?.content) || ''; });
+            loadDashboardStats(); loadCategorySelect();
+            listenData('carousel', 'carousel_list', 'carousel'); listenData('categories', 'categories_list', 'categories');
+            listenData('cards', 'cards_list', 'cards'); listenData('iconTicker', 'ticker_list', 'iconTicker');
+            listenData('toolIcons', 'tools_list', 'toolIcons');
+        }
+        initAuth();
     </script>
 </body>
-</html>
+    </html>
