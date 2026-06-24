@@ -7,7 +7,7 @@
     <!-- 引入 Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-database-compat.js"></script>
-    <!-- 【新增】引入手机端调试工具，如果出错，会在屏幕右下角显示具体原因 -->
+    <!-- 【保留】手机调试工具 -->
     <script src="https://unpkg.com/vconsole@latest/dist/vconsole.min.js"></script>
     <style>
         :root { --bg-main: #12131a; --bg-card: rgba(31, 33, 46, 0.65); --bg-input: rgba(255, 255, 255, 0.04); --border-glass: rgba(255, 255, 255, 0.08); --text-white: #ffffff; --text-gray: #9ca3af; --primary-purple: #a855f7; --primary-gradient: linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%); --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.5); }
@@ -29,7 +29,7 @@
         #dashboardWrapper { display: none; max-width: 1600px; margin: 0 auto; padding: 12px; }
         .mobile-header { display: none; position: sticky; top: 0; z-index: 50; padding: 12px 0 16px; align-items: center; justify-content: space-between; background: var(--bg-main); }
         .mobile-header .title { font-size: 18px; font-weight: 800; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .hamburger { background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: 12px; font-size: 20px; padding: 8px 12px; color: #fff; backdrop-filter: blur(8px); }
+        .hamburger { background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: 12px; font-size: 20px; padding: 8px 12px; color: #fff; backdrop-filter: blur(8px); cursor: pointer; }
         .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 260px; background: var(--bg-card); backdrop-filter: blur(20px); border-right: 1px solid var(--border-glass); padding: 24px 16px; display: flex; flex-direction: column; z-index: 999; transition: transform 0.3s; transform: translateX(-100%); box-shadow: 4px 0 40px rgba(0,0,0,0.5); }
         .sidebar.open { transform: translateX(0); }
         .brand { display: flex; align-items: center; gap: 12px; font-size: 18px; font-weight: 800; margin-bottom: 32px; }
@@ -146,7 +146,12 @@
 
     <!-- 后台主页 -->
     <div id="dashboardWrapper">
-        <div class="mobile-header"><button class="hamburger" onclick="toggleSidebar()">☰</button><div class="title">导航管理中心</div><button onclick="location.reload()" style="background:none; border:none; color:var(--text-gray); font-size:20px;">⟳</button></div>
+        <div class="mobile-header">
+            <!-- 注意：这里去掉了 onclick，改用 JS 绑定 -->
+            <button class="hamburger" id="menuBtn">☰</button>
+            <div class="title">导航管理中心</div>
+            <button onclick="location.reload()" style="background:none; border:none; color:var(--text-gray); font-size:20px;">⟳</button>
+        </div>
         <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
         <div class="sidebar" id="sidebar">
             <div class="brand"><div class="icon">◉</div><span>极光中心</span></div>
@@ -209,7 +214,6 @@
             appId: "1:793178735751:web:961c6e801b209e2dcce422"
         };
 
-        // 使用 try...catch 保护初始化，防止浏览器卡死
         let db = null;
         try {
             firebase.initializeApp(firebaseConfig);
@@ -293,6 +297,34 @@
             if (savedUser) { loginSuccess(savedUser); return; }
             switchMode('modeLogin'); setMsg('请输入账号和密码登录');
         }
+
+        // ===================== 【修复】菜单切换逻辑 =====================
+        function toggleSidebar() {
+            console.log("汉堡菜单被点击了！"); // 你可以用 vConsole 看到这个日志
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            if (sidebar) {
+                sidebar.classList.toggle('open');
+            } else {
+                console.error("找不到 sidebar 元素！");
+            }
+            if (overlay) {
+                overlay.classList.toggle('active');
+            } else {
+                console.error("找不到 overlay 元素！");
+            }
+        }
+
+        // 使用 JS 绑定点击事件，而不是写在 HTML 的 onclick 里（更稳定）
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuBtn = document.getElementById('menuBtn');
+            if (menuBtn) {
+                menuBtn.addEventListener('click', toggleSidebar);
+                console.log("✅ 汉堡菜单按钮已绑定点击事件");
+            } else {
+                console.error("❌ 找不到 id 为 menuBtn 的汉堡菜单按钮！");
+            }
+        });
 
         // ===================== 3. 编辑功能 =====================
         function openEdit(path, key, data) {
