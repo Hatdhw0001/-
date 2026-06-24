@@ -12,7 +12,6 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif; }
         body { background: var(--bg-main); color: var(--text-white); min-height: 100vh; overflow-x: hidden; }
         body::after { content: ""; position: fixed; inset: 0; z-index: -1; background: radial-gradient(circle at 10% 20%, rgba(168, 85, 247, 0.15), transparent 40%), radial-gradient(circle at 90% 80%, rgba(217, 70, 239, 0.10), transparent 40%); pointer-events: none; }
-        
         .login-wrapper { position: fixed; inset: 0; background: var(--bg-main); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
         .login-box { width: 100%; max-width: 380px; background: var(--bg-card); backdrop-filter: blur(16px); border: 1px solid var(--border-glass); border-radius: 24px; padding: 32px 24px; box-shadow: var(--shadow-glass); }
         .login-box h2 { text-align: center; font-size: 22px; font-weight: 800; margin-bottom: 24px; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -25,7 +24,6 @@
         .btn-link { background: transparent; border: none; color: var(--text-gray); font-size: 14px; text-decoration: underline; cursor: pointer; margin-top: 10px; display: block; text-align: center; }
         .login-msg { margin-top: 12px; text-align: center; font-size: 14px; min-height: 24px; color: var(--text-gray); }
         .login-msg.error { color: #ef4444; }.login-msg.success { color: #22c55e; }
-        
         #dashboardWrapper { display: none; max-width: 1600px; margin: 0 auto; padding: 12px; }
         .mobile-header { display: none; position: sticky; top: 0; z-index: 50; padding: 12px 0 16px; align-items: center; justify-content: space-between; background: var(--bg-main); }
         .mobile-header .title { font-size: 18px; font-weight: 800; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -46,7 +44,6 @@
         .overlay.active { display: block; }
         .main-content { padding: 24px; margin-left: 260px; min-height: 100vh; }
         @media (max-width: 768px) { .mobile-header { display: flex; } .main-content { margin-left: 0; padding: 0; } .sidebar { width: 280px; } }
-        
         .glass-card { background: var(--bg-card); backdrop-filter: blur(12px); border: 1px solid var(--border-glass); border-radius: 20px; padding: 20px; box-shadow: var(--shadow-glass); }
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; flex: 1; }
         @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); margin-bottom: 16px; } }
@@ -55,7 +52,6 @@
         @keyframes rotate { 100% { transform: rotate(360deg); } }
         .stat-box .num { position: relative; font-size: 28px; font-weight: 800; margin-top: 4px; color: #fff; }
         .stat-box .lbl { position: relative; font-size: 13px; color: var(--text-gray); font-weight: 500; }
-        
         .admin-tab { display: none; }.admin-tab.active { display: block; }
         .panel-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
         .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
@@ -68,7 +64,6 @@
         .btn:active { transform: scale(0.96); }.btn-grad { background: var(--primary-gradient); color: #fff; box-shadow: 0 4px 12px rgba(168, 85, 247, 0.25); }
         .btn-grad-full { width: 100%; padding: 12px; }.btn-danger { background: transparent; border: none; color: #f87171; font-size: 13px; padding: 4px 8px; }
         .btn-icon { background: rgba(255,255,255,0.05); border: 1px solid var(--border-glass); border-radius: 8px; width: 32px; height: 32px; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; }
-
         .list-area { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
         .list-item { display: flex; align-items: center; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-glass); border-radius: 12px; padding: 10px 14px; gap: 12px; position: relative; flex-shrink: 0; }
         .list-item img { width: 32px; height: 32px; border-radius: 8px; background: var(--bg-input); object-fit: cover; border: 1px solid var(--border-glass); flex-shrink: 0; }
@@ -80,10 +75,8 @@
         .list-item .actions .btn-edit { background: transparent; border: none; color: #60a5fa; font-size: 12px; padding: 4px 8px; }
         .list-item .actions .btn-del { background: transparent; border: none; color: #f87171; font-size: 12px; padding: 4px 8px; }
         .empty-tip { color: var(--text-gray); text-align: center; padding: 20px 0; font-size: 14px; }
-
         .preview-box { width: 48px; height: 48px; background: var(--bg-input); border-radius: 10px; border: 1px solid var(--border-glass); display: flex; align-items: center; justify-content: center; margin-top: 4px; color: var(--text-gray); }
         .preview-box img { width: 100%; height: 100%; object-fit: cover; display: none; border-radius: 10px; }
-
         .content-stack { display: flex; flex-direction: column; gap: 24px; width: 100%; }
         .content-stack .glass-card { width: 100%; margin-bottom: 0; }
         .dashboard-top { display: flex; gap: 24px; flex-wrap: wrap; }
@@ -98,12 +91,9 @@
         .legend-item .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
         .legend-item .dot.yellow { background: #eab308; }.legend-item .dot.purple { background: #8b5cf6; }.legend-item .dot.green { background: #22c55e; }
         .legend-item .val { margin-left: auto; color: #fff; font-weight: 600; }
-
         .file-upload-group { display: flex; gap: 10px; align-items: center; background: rgba(255,255,255,0.03); padding: 8px 12px; border-radius: 10px; border: 1px dashed var(--border-glass); margin-top: 4px; }
         .file-upload-btn { background: transparent; border: none; color: var(--text-gray); cursor: pointer; font-size: 13px; flex:1;}
         .file-upload-status { font-size: 12px; color: var(--text-gray); }
-
-        /* 新增：编辑面板模态框样式 */
         .edit-modal { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(18, 19, 26, 0.8); backdrop-filter: blur(4px); padding: 20px; align-items: center; justify-content: center; }
         .edit-modal.open { display: flex; }
         .edit-modal .modal-box { width: 100%; max-width: 460px; background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: 24px; padding: 24px; box-shadow: var(--shadow-glass); max-height: 90vh; overflow-y: auto; }
@@ -113,13 +103,12 @@
     </style>
 </head>
 <body>
-    <!-- ================= 编辑模态框 ================= -->
+    <!-- 编辑模态框 -->
     <div class="edit-modal" id="editModal">
         <div class="modal-box">
             <div class="panel-title" id="editTitle">✏️ 编辑数据</div>
             <input type="hidden" id="edit_path">
             <input type="hidden" id="edit_key">
-
             <div class="form-group"><label>名称</label><input id="edit_name" placeholder="输入名称"></div>
             <div class="form-group"><label>图标链接</label><input id="edit_avatar" placeholder="输入图标URL" oninput="previewImg(this.value, 'edit_preview')"></div>
             <div id="edit_preview" class="preview-box"><span>预览</span></div>
@@ -136,7 +125,7 @@
         </div>
     </div>
 
-    <!-- ================= 登录/注册 ================= -->
+    <!-- 登录/注册 -->
     <div class="login-wrapper" id="loginWrapper">
         <div class="login-box">
             <h2>⚡ 管理中心</h2>
@@ -156,7 +145,7 @@
         </div>
     </div>
 
-    <!-- ================= 后台主页 ================= -->
+    <!-- 后台主页 -->
     <div id="dashboardWrapper">
         <div class="mobile-header"><button class="hamburger" onclick="toggleSidebar()">☰</button><div class="title">导航管理中心</div><button onclick="location.reload()" style="background:none; border:none; color:var(--text-gray); font-size:20px;">⟳</button></div>
         <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
@@ -173,19 +162,13 @@
         </div>
 
         <div class="main-content">
-            <!-- 看板 -->
             <div id="tab-dashboard" class="admin-tab active"><div class="glass-card" style="border: 1px solid rgba(168, 85, 247, 0.2);"><div class="dashboard-top"><div class="dashboard-stats-col"><div class="panel-title">📊 平台数据总览</div><div class="stats-grid"><div class="stat-box"><div class="lbl">📈 今日访问量</div><div class="num" id="stat_visits">--</div></div><div class="stat-box"><div class="lbl">📱 应用总数</div><div class="num" id="stat_cards">--</div></div><div class="stat-box"><div class="lbl">🎮 游戏总数</div><div class="num" id="stat_games">--</div></div><div class="stat-box"><div class="lbl">🏷️ 分类总数</div><div class="num" id="stat_categories">--</div></div></div></div><div class="dashboard-chart-col"><div class="panel-title" style="font-size: 13px; color: var(--text-gray); font-weight: 500; margin-bottom: 8px; width: 100%; text-align: left;">用户数据占比统计</div><div class="donut-container"><div class="donut-chart" id="realDonutChart"><div class="donut-hole" id="chartTotal">总计</div></div></div><div class="legend-list"><div class="legend-item"><span class="dot yellow"></span> 访客数据 <span class="val" id="chartVisits">0</span></div><div class="legend-item"><span class="dot purple"></span> 总点击量 <span class="val" id="chartClicks">0</span></div><div class="legend-item"><span class="dot green"></span> 游戏点击量 <span class="val" id="chartGameClicks">0</span></div></div><div style="font-size: 10px; color: rgba(255,255,255,0.2); margin-top: 6px; text-align: center; width: 100%;">数据实时同步于 Firebase</div></div></div></div></div>
 
-            <!-- 全局配置 -->
             <div id="tab-global" class="admin-tab"><div class="content-stack"><div class="glass-card"><div class="panel-title">⚙️ 基础信息设置</div><div class="form-group"><label>网站标题</label><input id="g_siteName" placeholder="非凡人生"></div><div class="form-group"><label>Logo路径</label><input id="g_siteLogo" placeholder="sjb88.webp"></div><button class="btn btn-grad" onclick="saveGlobal()" style="margin-top:8px;">保存配置</button></div><div class="glass-card"><div class="panel-title">🔗 快捷链接配置</div><div class="form-group"><label>右上角按钮文字</label><input id="g_headerText" placeholder="旺旺联系25392429"></div><div class="form-group"><label>右上角按钮链接</label><input id="g_headerLink" placeholder="https://链接"></div><div class="form-group"><label>跑马灯文字</label><input id="g_marquee" placeholder="🔥 今日推荐"></div></div></div></div>
 
-            <!-- 内容总控 -->
             <div id="tab-contents" class="admin-tab"><div class="panel-header"><div class="panel-title" style="margin-bottom:0;">📦 数据管理 (分类 · 应用 · 游戏 · 工具)</div><button class="btn-icon" onclick="location.reload()" title="重新加载数据">⟳</button></div><div class="content-stack">
-                
-                <!-- 分类 -->
                 <div class="glass-card"><div class="panel-title">🏷️ 分类管理</div><div id="categories_list" class="list-area"></div><div style="background: rgba(255,255,255,0.03); padding:16px; border-radius:12px; border:1px dashed var(--border-glass);"><div class="form-group"><input id="new_cat_id" placeholder="分类ID" style="flex:1"><input id="new_cat_name" placeholder="分类名称" style="flex:2"></div><button class="btn btn-grad btn-grad-full" onclick="addItem('categories')">+ 添加分类</button></div></div>
 
-                <!-- 应用 -->
                 <div class="glass-card"><div class="panel-title">📱 应用管理</div><div id="cards_list" class="list-area"></div><div style="background: rgba(255,255,255,0.03); padding:16px; border-radius:12px; border:1px dashed var(--border-glass);">
                     <div class="form-group"><label>应用名称</label><input id="new_card_title" placeholder="胜天国际"></div>
                     <div class="form-group"><label>图标</label><div class="file-upload-group"><input type="file" id="new_card_file" accept="image/*" style="display:none;" onchange="handleSupabaseUpload(this.files[0], 'new_card_avatar')"><button class="file-upload-btn" onclick="document.getElementById('new_card_file').click()">📁 选择手机相册图片</button><span class="file-upload-status" id="upload_status">未选择</span></div><input type="text" id="new_card_avatar" placeholder="或者手动粘贴图片网址" style="margin-top:8px;"></div>
@@ -195,26 +178,23 @@
                     <button class="btn btn-grad btn-grad-full" onclick="addItem('cards')">+ 添加应用</button>
                 </div></div>
 
-                <!-- 游戏 (新增链接) -->
                 <div class="glass-card"><div class="panel-title">🎮 游戏管理</div><div id="ticker_list" class="list-area"></div><div style="background: rgba(255,255,255,0.03); padding:16px; border-radius:12px; border:1px dashed var(--border-glass);"><div class="form-group"><label>游戏名称</label><input id="new_ticker_name" placeholder="奥林匹思之门"></div><div class="form-group"><label>图标</label><div class="file-upload-group"><input type="file" id="new_ticker_file" accept="image/*" style="display:none;" onchange="handleSupabaseUpload(this.files[0], 'new_ticker_icon')"><button class="file-upload-btn" onclick="document.getElementById('new_ticker_file').click()">📁 选择手机相册图片</button><span class="file-upload-status" id="upload_ticker_status">未选择</span></div><input type="text" id="new_ticker_icon" placeholder="或者手动粘贴图片网址" style="margin-top:8px;"></div>
                     <div class="form-group"><label>跳转链接</label><input id="new_ticker_link" placeholder="https://..."></div>
                     <button class="btn btn-grad btn-grad-full" onclick="addItem('iconTicker')">+ 添加游戏</button>
                 </div></div>
 
-                <!-- 工具 (新增链接) -->
                 <div class="glass-card"><div class="panel-title">🔧 工具管理</div><div id="tools_list" class="list-area"></div><div style="background: rgba(255,255,255,0.03); padding:16px; border-radius:12px; border:1px dashed var(--border-glass);"><div class="form-group"><label>工具名称</label><input id="new_tool_name" placeholder="商务助手"></div><div class="form-group"><label>图标</label><div class="file-upload-group"><input type="file" id="new_tool_file" accept="image/*" style="display:none;" onchange="handleSupabaseUpload(this.files[0], 'new_tool_icon')"><button class="file-upload-btn" onclick="document.getElementById('new_tool_file').click()">📁 选择手机相册图片</button><span class="file-upload-status" id="upload_tool_status">未选择</span></div><input type="text" id="new_tool_icon" placeholder="或者手动粘贴图片网址" style="margin-top:8px;"></div>
                     <div class="form-group"><label>跳转链接</label><input id="new_tool_link" placeholder="https://..."></div>
                     <button class="btn btn-grad btn-grad-full" onclick="addItem('toolIcons')">+ 添加工具</button>
                 </div></div>
             </div></div>
 
-            <!-- 轮播 -->
             <div id="tab-carousel" class="admin-tab"><div class="glass-card"><div class="panel-title">🖼️ 轮播图列表</div><div id="carousel_list" class="list-area"></div><div style="background: rgba(255,255,255,0.03); padding:16px; border-radius:12px; border:1px dashed var(--border-glass);"><div class="form-group"><label>图片</label><div class="file-upload-group"><input type="file" id="new_carousel_file" accept="image/*" style="display:none;" onchange="handleSupabaseUpload(this.files[0], 'new_carousel_url')"><button class="file-upload-btn" onclick="document.getElementById('new_carousel_file').click()">📁 选择手机相册图片</button><span class="file-upload-status" id="upload_carousel_status">未选择</span></div><input type="text" id="new_carousel_url" placeholder="或者手动粘贴图片网址" style="margin-top:8px;"></div><div class="form-group"><label>跳转链接(选填)</label><input id="new_carousel_link" placeholder="https://xxx.com"></div><button class="btn btn-grad btn-grad-full" onclick="addItem('carousel')">+ 添加轮播</button></div></div></div>
         </div>
     </div>
 
     <script>
-        // ===================== 1. 系统配置 =====================
+        // ===================== 1. 配置中心 =====================
         const firebaseConfig = {
             apiKey: "AIzaSyCI5yewq1Cu5I38LLjuky9KG1rnKh76W4Q",
             authDomain: "zmvv2011.firebaseapp.com",
@@ -232,17 +212,58 @@
         const supabase = supabase.createClient(supabaseUrl, supabaseKey);
         const STORAGE_BUCKET = 'nav-icons';
 
-        // ===================== 2. 登录逻辑 =====================
+        // ===================== 2. 登录与注册 =====================
         const loginWrapper = document.getElementById('loginWrapper');
         const dashboardWrapper = document.getElementById('dashboardWrapper');
         const msgEl = document.getElementById('loginMsg');
         function setMsg(text, isError = false) { msgEl.textContent = text; msgEl.className = 'login-msg' + (isError ? ' error' : ''); }
         function switchMode(modeId) { document.getElementById('modeLogin').classList.remove('active'); document.getElementById('modeRegister').classList.remove('active'); document.getElementById(modeId).classList.add('active'); setMsg(''); }
-        async function handleRegister() { const user = document.getElementById('regUser').value.trim(); const pass = document.getElementById('regPass').value.trim(); const btn = document.getElementById('btnRegister'); if (!user || !pass) return setMsg('⚠️ 用户名和密码不能为空！', true); if (pass.length < 4) return setMsg('⚠️ 密码长度不能少于4位！', true); btn.disabled = true; setMsg('⏳ 正在检查用户名...'); try { const snap = await db.ref('admin_users/' + user).once('value'); if (snap.exists()) { setMsg('❌ 该用户名已被注册！', true); btn.disabled = false; return; } await db.ref('admin_users/' + user).set({ password: pass }); setMsg('✅ 注册成功！正在自动登录...', false); setTimeout(() => { loginSuccess(user); }, 800); } catch (e) { setMsg('❌ 注册失败：' + e.message, true); btn.disabled = false; } }
-        async function handleLogin() { const user = document.getElementById('loginUser').value.trim(); const pass = document.getElementById('loginPass').value.trim(); const btn = document.getElementById('btnLogin'); if (!user || !pass) return setMsg('⚠️ 请输入用户名和密码！', true); btn.disabled = true; setMsg('⏳ 正在验证身份...'); try { const snap = await db.ref('admin_users/' + user).once('value'); if (!snap.exists()) { setMsg('❌ 用户名不存在，请先注册！', true); btn.disabled = false; return; } const data = snap.val(); if (data.password !== pass) { setMsg('❌ 密码错误！', true); btn.disabled = false; return; } setMsg('✅ 验证通过！正在进入...', false); setTimeout(() => { loginSuccess(user); }, 400); } catch (e) { setMsg('❌ 登录异常：' + e.message, true); btn.disabled = false; } }
-        function loginSuccess(username) { localStorage.setItem('admin_user', username); loginWrapper.style.display = 'none'; dashboardWrapper.style.display = 'block'; document.getElementById('userNameDisplay').textContent = username; document.getElementById('userAvatar').textContent = username.charAt(0).toUpperCase(); initDashboardApp(); }
-        document.getElementById('logoutBtn').addEventListener('click', function() { if(confirm("确定要退出登录吗？")) { localStorage.removeItem('admin_user'); location.reload(); } });
-        function initAuth() { const savedUser = localStorage.getItem('admin_user'); if (savedUser) { loginSuccess(savedUser); return; } switchMode('modeLogin'); setMsg('请输入账号和密码登录'); }
+        async function handleRegister() {
+            const user = document.getElementById('regUser').value.trim();
+            const pass = document.getElementById('regPass').value.trim();
+            const btn = document.getElementById('btnRegister');
+            if (!user || !pass) return setMsg('⚠️ 用户名和密码不能为空！', true);
+            if (pass.length < 4) return setMsg('⚠️ 密码长度不能少于4位！', true);
+            btn.disabled = true; setMsg('⏳ 正在检查用户名...');
+            try {
+                const snap = await db.ref('admin_users/' + user).once('value');
+                if (snap.exists()) { setMsg('❌ 该用户名已被注册！', true); btn.disabled = false; return; }
+                await db.ref('admin_users/' + user).set({ password: pass });
+                setMsg('✅ 注册成功！正在自动登录...', false);
+                setTimeout(() => { loginSuccess(user); }, 800);
+            } catch (e) { setMsg('❌ 注册失败：' + e.message, true); btn.disabled = false; }
+        }
+        async function handleLogin() {
+            const user = document.getElementById('loginUser').value.trim();
+            const pass = document.getElementById('loginPass').value.trim();
+            const btn = document.getElementById('btnLogin');
+            if (!user || !pass) return setMsg('⚠️ 请输入用户名和密码！', true);
+            btn.disabled = true; setMsg('⏳ 正在验证身份...');
+            try {
+                const snap = await db.ref('admin_users/' + user).once('value');
+                if (!snap.exists()) { setMsg('❌ 用户名不存在，请先注册！', true); btn.disabled = false; return; }
+                const data = snap.val();
+                if (data.password !== pass) { setMsg('❌ 密码错误！', true); btn.disabled = false; return; }
+                setMsg('✅ 验证通过！正在进入...', false);
+                setTimeout(() => { loginSuccess(user); }, 400);
+            } catch (e) { setMsg('❌ 登录异常：' + e.message, true); btn.disabled = false; }
+        }
+        function loginSuccess(username) {
+            localStorage.setItem('admin_user', username);
+            loginWrapper.style.display = 'none';
+            dashboardWrapper.style.display = 'block';
+            document.getElementById('userNameDisplay').textContent = username;
+            document.getElementById('userAvatar').textContent = username.charAt(0).toUpperCase();
+            initDashboardApp();
+        }
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            if(confirm("确定要退出登录吗？")) { localStorage.removeItem('admin_user'); location.reload(); }
+        });
+        function initAuth() {
+            const savedUser = localStorage.getItem('admin_user');
+            if (savedUser) { loginSuccess(savedUser); return; }
+            switchMode('modeLogin'); setMsg('请输入账号和密码登录');
+        }
 
         // ===================== 3. 图片上传 =====================
         async function handleSupabaseUpload(file, targetInputId) {
@@ -255,19 +276,17 @@
             const fileExt = file.name.split('.').pop();
             const fileName = `${Date.now()}.${fileExt}`;
             const { data, error } = await supabase.storage.from(STORAGE_BUCKET).upload(fileName, file);
-            if (error) { console.error(error); statusEl.textContent = '❌ 上传失败！'; alert("上传到 Supabase 失败: " + error.message); return; }
+            if (error) { console.error(error); statusEl.textContent = '❌ 上传失败！'; return; }
             const publicURL = `${supabaseUrl}/storage/v1/object/public/${STORAGE_BUCKET}/${data.path}`;
             statusEl.textContent = '✅ 上传成功！';
             inputEl.value = publicURL;
             previewImg(publicURL, 'card_preview');
         }
 
-        // ===================== 4. 编辑功能核心 =====================
+        // ===================== 4. 编辑功能 =====================
         function openEdit(path, key, data) {
-            const modal = document.getElementById('editModal');
-            modal.classList.add('open');
-            document.getElementById('edit_path').value = path;
-            document.getElementById('edit_key').value = key;
+            const modal = document.getElementById('editModal'); modal.classList.add('open');
+            document.getElementById('edit_path').value = path; document.getElementById('edit_key').value = key;
             document.getElementById('edit_name').value = data.title || data.name || '';
             document.getElementById('edit_avatar').value = data.avatar || data.icon || data.url || '';
             document.getElementById('edit_link').value = data.linkUrl || data.link || '';
@@ -296,7 +315,7 @@
         }
         document.getElementById('editModal').addEventListener('click', function(e) { if (e.target === this) closeEdit(); });
 
-        // ===================== 5. 列表渲染与操作逻辑 =====================
+        // ===================== 5. 渲染与列表逻辑 =====================
         function previewImg(url, id) { const box = document.getElementById(id); box.innerHTML = url ? `<img src="${url}" onerror="this.parentElement.innerHTML='<span>图片无效</span>'">` : '<span>预览</span>'; }
         function parseToArray(data) { if (!data) return []; return Array.isArray(data) ? data : Object.values(data); }
         let categoryMap = {};
@@ -333,7 +352,7 @@
         }
         function deleteItem(path, key) { if(confirm("确定要删除这条数据吗？")) db.ref(path).child(key).remove(); }
 
-        // ===================== 6. 添加与保存逻辑 =====================
+        // ===================== 6. 添加与保存 =====================
         function addItem(path) {
             const map = { 'carousel': ['new_carousel_url', 'new_carousel_link'], 'categories': ['new_cat_id', 'new_cat_name'], 'cards': ['new_card_title', 'new_card_avatar', 'new_card_link', 'new_card_order', 'new_card_category', 'new_card_badge'], 'iconTicker': ['new_ticker_name', 'new_ticker_icon', 'new_ticker_link'], 'toolIcons': ['new_tool_name', 'new_tool_icon', 'new_tool_link'] };
             const ids = map[path]; if(!ids) return;
@@ -351,7 +370,6 @@
                 if(path === 'categories') loadCategorySelect(addedId);
             }).catch(e => alert("添加失败："+e.message));
         }
-
         function saveGlobal() {
             const data = { siteName: document.getElementById('g_siteName').value, siteLogo: document.getElementById('g_siteLogo').value, header_text: document.getElementById('g_headerText').value, header_href: document.getElementById('g_headerLink').value };
             const marquee = { content: document.getElementById('g_marquee').value };
@@ -394,4 +412,4 @@
         initAuth();
     </script>
 </body>
-    </html>
+</html>
